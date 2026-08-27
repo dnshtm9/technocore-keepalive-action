@@ -1,0 +1,27 @@
+name: Test keepalive
+"on":
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: dry-run placeholder DID
+        run: python keepalive.py --did "did:key:z6Mk...PLACEHOLDER" --dry-run
+      - name: dry-run with mailbox placeholder
+        run: python keepalive.py --did "did:key:z6Mk...PLACEHOLDER" --mailbox "mb-p-...REDACTED" --dry-run
+      - name: dry-run stranger DID (shard check)
+        run: python keepalive.py --did "did:key:z6MksSaVoKCFuB4VaD1xpfetW1ZKrgqw1ct9T4dHAVedM45z" --dry-run
+      - name: dry-run no-verify placeholder
+        run: python keepalive.py --did "did:key:z6Mk...PLACEHOLDER" --no-verify --dry-run || true
+      # live check only on main to avoid spam on PRs — for real live POST set secrets.TECHNOCORE_DID and use --mailbox "${{ secrets.TECHNOCORE_MAILBOX }}"
+      - name: live POST placeholder (main only) — dry-run only, no live network with placeholder DID
+        if: github.ref == 'refs/heads/main'
+        run: python keepalive.py --did "did:key:z6Mk...PLACEHOLDER" --mailbox "mb-p-...REDACTED" --dry-run

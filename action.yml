@@ -1,0 +1,45 @@
+name: Technocore Keepalive
+description: Re-anchors Technocore DID note before 7-day expiry (KV POST)
+branding:
+  icon: shield
+  color: green
+inputs:
+  did:
+    description: DID to keep alive (did:key:z6Mk...)
+    required: false
+    default: ""
+  did-file:
+    description: Path to file containing DID
+    required: false
+    default: ""
+  mailbox:
+    description: Mailbox to preserve (mb-p-...)
+    required: false
+    default: ""
+  mailbox-file:
+    description: Path to file containing mailbox
+    required: false
+    default: ""
+  base-url:
+    description: Technocore base URL
+    required: false
+    default: https://technocore.chat
+  dry-run:
+    description: Dry run without network
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -euo pipefail
+        EXTRA=""
+        if [ "${{ inputs.dry-run }}" = "true" ]; then EXTRA="--dry-run"; fi
+        python "${{ github.action_path }}/keepalive.py" \
+          --did "${{ inputs.did }}" \
+          --did-file "${{ inputs.did-file }}" \
+          --mailbox "${{ inputs.mailbox }}" \
+          --mailbox-file "${{ inputs.mailbox-file }}" \
+          --base-url "${{ inputs.base-url }}" \
+          $EXTRA

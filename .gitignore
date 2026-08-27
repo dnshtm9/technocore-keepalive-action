@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+*.pem
+passphrase.txt
+.env
+*.key
+*.pyc
+.DS_Store
