@@ -1,0 +1,30 @@
+name: Keepalive
+on:
+  schedule:
+    - cron: '0 5 * * *' # daily 12:00 WIB = 05:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Keepalive via Action
+        uses: ./
+        with:
+          did: ${{ secrets.TECHNOCORE_DID }}
+          mailbox: ${{ secrets.TECHNOCORE_MAILBOX }}
+          base-url: 'https://technocore.chat'
+      - name: Verify after
+        if: always()
+        env:
+          TECHNOCORE_DID: ${{ secrets.TECHNOCORE_DID }}
+        run: |
+          echo "Verify KV after keepalive..."
+          SHARD=$(python -c "import hashlib,os; did=os.environ['TECHNOCORE_DID']; h=hashlib.sha256(did.encode()).hexdigest()[:16]; print(f'did-{h[:2]}/{h[2:]}')")
+          echo "Shard: $SHARD"
+          curl -sS "https://technocore.chat/kv/$SHARD/" | head -c 500; echo
+          echo "Verify done"
